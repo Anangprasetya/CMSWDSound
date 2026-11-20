@@ -45,10 +45,12 @@
         <script type="application/ld+json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(schema))</script>
     }
     <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
-    <link rel="stylesheet" href="/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.9/dist/css/bootstrap.min.css"
+          integrity="sha384-yEPZ7jP9S0QKiUQ0m3jjsO4ProIW7wvR9gXkI7JOGa2XVsw53Yke2bsdkBbjmmiX" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/site.css" asp-append-version="true">
     <script defer src="/js/site.js" asp-append-version="true"></script>
-    <script defer src="/vendor/alpine.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.17.5/dist/cdn.min.js"
+            integrity="sha384-FYLKjwG3aohNhNZoVG8sY/5ntunm+MqylL90Q+rT3OM7AwV9/BKFjk/RjoIpIgsI" crossorigin="anonymous"></script>
 </head>
 <body data-analytics="@site?.Settings.AnalyticsId" data-item-kind="@site?.Entry?.Kind.ToString().ToLowerInvariant()" class="@(admin ? "admin" : "")">
 <a class="visually-hidden-focusable skip" href="#main">@(site?.T("Ke konten utama", "Skip to content") ?? "Ke konten utama")</a>

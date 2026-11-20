@@ -87,7 +87,13 @@ def main():
     assert 'lang="id"' in call(visitor, "/id")[0]
     for page in ("about", "products", "packages", "gallery", "testimonials", "faq", "contact"):
         assert 'lang="en"' in call(visitor, f"/en/{page}")[0]
-    call(visitor, "/vendor/bootstrap.min.css")
+    home = call(visitor, "/id")[0]
+    for asset in ("bootstrap@5.3.9/dist/css/bootstrap.min.css", "alpinejs@3.17.5/dist/cdn.min.js"):
+        assert re.search(
+            re.escape("https://cdn.jsdelivr.net/npm/" + asset)
+            + r'"\s+integrity="sha384-[A-Za-z0-9+/]+" crossorigin="anonymous"',
+            home,
+        ), asset
     call(visitor, "/images/stage.webp")
     call(visitor, "/admin", 302)
     call(visitor, "/id/contact", 400, fields={"Name": "No token", "Message": "Must be rejected"})

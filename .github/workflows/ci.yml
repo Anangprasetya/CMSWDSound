@@ -13,14 +13,8 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-      - name: Restore frontend and .NET dependencies
-        run: |
-          npm --prefix src/WDSound.Web ci --ignore-scripts
-          npm --prefix src/WDSound.Web run build
-          dotnet restore --locked-mode
+      - name: Restore .NET dependencies
+        run: dotnet restore --locked-mode
       - name: Unit tests
         run: dotnet test --no-restore
       - name: HTTP smoke test with SQLite

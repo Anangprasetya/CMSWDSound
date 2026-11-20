@@ -4,11 +4,9 @@ Website profil, katalog sewa, dan CMS untuk Wandi Sound System di Jawa Timur. We
 
 ## Pengembangan
 
-Prasyarat: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) sesuai `global.json`, Node.js 22 atau lebih baru, npm, dan SQL Server untuk basis data utama. Bootstrap 5.3.9 dan Alpine.js 3.17.5 dikunci melalui npm, lalu disalin ke aset aplikasi.
+Prasyarat: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) sesuai `global.json` dan SQL Server untuk basis data utama. Browser memuat Bootstrap 5.3.9 dan Alpine.js 3.17.5 dari jsDelivr dengan pemeriksaan Subresource Integrity (SRI).
 
 ```sh
-npm --prefix src/WDSound.Web ci --ignore-scripts
-npm --prefix src/WDSound.Web run build
 dotnet restore --locked-mode
 dotnet build --no-restore
 ```

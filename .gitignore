@@ -1,7 +1,5 @@
 **/bin/
 **/obj/
-**/node_modules/
 **/App_Data/
 .env
 *.user
-**/wwwroot/vendor/

@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WDSound.Web/WDSound.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WDSound.UnitTests/WDSound.UnitTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,18 @@
+@model List<Inquiry>
+<partial name="_Menu" />
+<h1>Pertanyaan masuk</h1>
+@if (Model.Count == 0) { <p>Belum ada pertanyaan.</p> }
+<div class="questions">
+@foreach (var item in Model)
+{
+    <section class="panel">
+        <h2>@item.Name</h2>
+        <time datetime="@item.CreatedUtc.ToString("O")">@item.CreatedUtc.ToString("yyyy-MM-dd HH:mm") UTC</time>
+        <p class="long-copy">@item.Message</p>
+        @if (!item.Reviewed)
+        {
+            <form asp-action="Review" asp-route-id="@item.Id" method="post"><button class="btn btn-outline">Tandai sudah dibaca</button></form>
+        }
+    </section>
+}
+</div>

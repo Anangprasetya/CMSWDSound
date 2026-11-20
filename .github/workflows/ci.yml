@@ -1,0 +1,50 @@
+name: Build and test
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Restore frontend and .NET dependencies
+        run: |
+          npm --prefix src/WDSound.Web ci --ignore-scripts
+          npm --prefix src/WDSound.Web run build
+          dotnet restore --locked-mode
+      - name: Unit tests
+        run: dotnet test --no-restore
+      - name: HTTP smoke test with SQLite
+        run: bash tests/run-smoke.sh
+      - name: HTTP smoke test with SQL Server
+        run: |
+          set -euo pipefail
+          password="$(openssl rand -hex 20)Aa1!"
+          echo "::add-mask::$password"
+          docker run -d --name wdsound-sql -p 127.0.0.1:1433:1433 \
+            -e ACCEPT_EULA=Y -e MSSQL_PID=Developer -e MSSQL_SA_PASSWORD="$password" \
+            mcr.microsoft.com/mssql/server:2025-latest
+          ready=false
+          for _ in {1..60}; do
+            if docker exec -e SQLCMDPASSWORD="$password" wdsound-sql \
+              /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -b -Q 'SELECT 1' >/dev/null 2>&1; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [[ "$ready" != true ]]; then docker logs wdsound-sql; exit 1; fi
+          export ConnectionStrings__Catalog="Server=127.0.0.1,1433;Database=WDSoundSmoke;User Id=sa;Password=$password;Encrypt=True;TrustServerCertificate=True"
+          bash tests/run-smoke.sh
+      - name: Cleanup SQL Server
+        if: always()
+        run: docker rm -f wdsound-sql || true

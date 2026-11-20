@@ -1,0 +1,36 @@
+@model AccountInput
+<partial name="_Menu" />
+<h1>Pengguna dashboard</h1>
+<form asp-action="Accounts" method="post" class="form-stack panel">
+    <h2>Buat akun</h2>
+    <div asp-validation-summary="All" class="validation"></div>
+    <div class="field-grid">
+        <div><label asp-for="Email">Email</label><input asp-for="Email" required></div>
+        <div><label asp-for="Password">Kata sandi sementara</label><input asp-for="Password" autocomplete="new-password" required></div>
+        <div><label asp-for="Role">Peran</label><select asp-for="Role"><option>Editor</option><option>Admin</option></select></div>
+    </div>
+    <button class="btn btn-primary">Buat akun</button>
+</form>
+<div class="table-responsive mt-4">
+<table class="table admin-table">
+    <thead><tr><th>Email</th><th>Peran</th><th>Tindakan</th></tr></thead>
+    <tbody>
+    @foreach (var account in (List<Microsoft.AspNetCore.Identity.IdentityUser>)ViewBag.Accounts)
+    {
+        var isAdmin = ((HashSet<string>)ViewBag.Admins).Contains(account.Id);
+        <tr>
+            <td>@account.Email</td><td>@(isAdmin ? "Admin" : "Editor")</td>
+            <td>
+                @if (account.UserName != User.Identity?.Name)
+                {
+                    <form asp-action="ChangeRole" asp-route-id="@account.Id" method="post">
+                        <input type="hidden" name="role" value="@(isAdmin ? "Editor" : "Admin")">
+                        <button class="btn btn-outline">Jadikan @(isAdmin ? "Editor" : "Admin")</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

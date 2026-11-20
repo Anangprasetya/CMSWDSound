@@ -1,0 +1,40 @@
+@model List<Entry>
+<partial name="_Menu" />
+<h1>Dashboard</h1>
+<div class="admin-counts">
+    <span>@Model.Count(x => !x.Published) draf</span><span>@Model.Count(x => x.Published) terbit</span>
+    @if (User.IsInRole("Admin")) { <a href="/admin/inquiries">@ViewBag.Inquiries pertanyaan baru</a> }
+</div>
+<div class="toolbar">
+    <form action="/admin" method="get">
+        <label for="kind">Jenis konten</label>
+        <select id="kind" name="kind">
+            <option value="">Semua</option>
+            @foreach (var kind in Enum.GetValues<ContentKind>())
+            {
+                <option value="@kind" selected="@((ContentKind?)ViewBag.Kind == kind)">@kind</option>
+            }
+        </select>
+        <button class="btn btn-outline">Filter</button>
+    </form>
+    <a class="btn btn-primary" href="/admin/edit?kind=@(ViewBag.Kind ?? ContentKind.Product)">Buat draf</a>
+</div>
+<div class="table-responsive">
+<table class="table admin-table">
+    <thead><tr><th>Judul</th><th>Jenis</th><th>Status</th><th>Tindakan</th></tr></thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.TitleId</td><td>@item.Kind</td><td>@(item.Published ? "Terbit" : "Draf")</td>
+            <td>
+                @if (!item.Published || User.IsInRole("Admin"))
+                {
+                    <a class="text-link" href="/admin/edit/@item.Id">Edit</a>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</div>

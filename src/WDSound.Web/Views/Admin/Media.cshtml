@@ -1,0 +1,27 @@
+@model List<Media>
+<partial name="_Menu" />
+<h1>Pustaka media</h1>
+<form asp-action="Upload" method="post" enctype="multipart/form-data" class="form-stack panel">
+    <label for="image">Gambar JPG, PNG, atau WebP (maks. 5 MB)</label>
+    <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp" required>
+    <div class="field-grid">
+        <div><label for="altId">Teks alternatif Indonesia</label><input id="altId" name="altId" maxlength="150" required></div>
+        <div><label for="altEn">Teks alternatif Inggris</label><input id="altEn" name="altEn" maxlength="150" required></div>
+    </div>
+    <button class="btn btn-primary">Unggah</button>
+</form>
+<div class="card-grid mt-4">
+@foreach (var item in Model)
+{
+    <article class="rental-card">
+        <img class="card-image" src="/media/@item.Id" alt="@item.AltId" loading="lazy">
+        <div class="card-copy">
+            <p>ID @item.Id · @item.AltId</p>
+            @if (User.IsInRole("Admin"))
+            {
+                <form asp-action="DeleteMedia" asp-route-id="@item.Id" method="post"><button class="btn btn-outline">Hapus</button></form>
+            }
+        </div>
+    </article>
+}
+</div>

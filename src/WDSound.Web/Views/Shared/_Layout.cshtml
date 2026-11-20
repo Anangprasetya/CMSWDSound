@@ -1,0 +1,115 @@
+@{
+    var site = Model as PublicPage;
+    var admin = site is null;
+    var title = site?.Entry?.Title(site.Lang) ?? site?.Label(site.Section) ?? (ViewData["Title"] as string ?? "Dashboard");
+    var description = site?.Entry?.Description(site.Lang) ?? site?.T("Penyewaan perlengkapan acara di Jawa Timur.", "Event equipment rental in East Java.");
+    var navigation = new[] { "home", "about", "products", "packages", "gallery", "testimonials", "faq", "contact" };
+    var media = site?.Entry?.Images.OrderBy(x => x.Sort).FirstOrDefault();
+    var canIndex = site is not null && !string.IsNullOrEmpty(site.Origin);
+}
+<!doctype html>
+<html lang="@(site?.Lang ?? "id")">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="@description">
+    <title>@title | WD Sound</title>
+    @if (admin) { <meta name="robots" content="noindex, nofollow"> }
+    @if (canIndex && site is not null)
+    {
+        <link rel="canonical" href="@(site.Origin + site.CurrentPath)">
+        <link rel="alternate" hreflang="id" href="@(site.Origin + (site.Lang == "id" ? site.CurrentPath : site.AlternatePath))">
+        <link rel="alternate" hreflang="en" href="@(site.Origin + (site.Lang == "en" ? site.CurrentPath : site.AlternatePath))">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="@(site.Origin + site.CurrentPath)">
+        <meta property="og:title" content="@title | WD Sound">
+        <meta property="og:description" content="@description">
+        @if (media is not null) { <meta property="og:image" content="@site.Origin/media/@media.MediaId"> }
+        @if (!string.IsNullOrEmpty(site.Settings.SearchVerification))
+        {
+            <meta name="google-site-verification" content="@site.Settings.SearchVerification">
+        }
+        var schema = new Dictionary<string, object?> {
+            ["@context"] = "https://schema.org",
+            ["@type"] = site.Entry?.Kind == ContentKind.Product ? "Product" : (string.IsNullOrWhiteSpace(site.Settings.Address) ? "Organization" : "LocalBusiness"),
+            ["name"] = site.Entry?.Kind == ContentKind.Product ? title : "Wandi Sound System",
+            ["description"] = description,
+            ["url"] = site.Origin + site.CurrentPath
+        };
+        if (media is not null) { schema["image"] = site.Origin + "/media/" + media.MediaId; }
+        if (site.Entry?.Kind != ContentKind.Product)
+        {
+            schema["areaServed"] = "Jawa Timur";
+            if (site.Settings.Address is not null) { schema["address"] = site.Settings.Address; }
+        }
+        <script type="application/ld+json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(schema))</script>
+    }
+    <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+    <link rel="stylesheet" href="/vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/site.css" asp-append-version="true">
+    <script defer src="/js/site.js" asp-append-version="true"></script>
+    <script defer src="/vendor/alpine.min.js"></script>
+</head>
+<body data-analytics="@site?.Settings.AnalyticsId" data-item-kind="@site?.Entry?.Kind.ToString().ToLowerInvariant()" class="@(admin ? "admin" : "")">
+<a class="visually-hidden-focusable skip" href="#main">@(site?.T("Ke konten utama", "Skip to content") ?? "Ke konten utama")</a>
+<header class="site-header">
+    <div class="shell header-inner">
+        <a class="brand" href="@(admin ? "/admin" : site!.Path("home"))">
+            <img src="/images/logo.svg" width="39" height="39" alt="">
+            <span>WD<span class="brand-accent">.</span>SOUND<small>WANDI SOUND SYSTEM</small></span>
+        </a>
+        @if (site is not null)
+        {
+            <div class="nav-wrap" x-data="{ open: false }" :class="{ 'is-open': open }" @@keydown.escape="open = false">
+                <button type="button" class="menu-button" x-on:click="open = !open" x-bind:aria-expanded="open" aria-controls="main-nav">Menu</button>
+                <nav id="main-nav" class="primary-nav" aria-label="@site.T("Navigasi utama", "Main navigation")">
+                    @foreach (var section in (site.Navigation.Count > 0 ? site.Navigation.Select(x => x.Slug) : navigation))
+                    {
+                        var label = site.Navigation.Find(x => x.Slug == section)?.Title(site.Lang) ?? site.Label(section);
+                        <a href="@site.Path(section)" aria-current="@(site.Section == section ? "page" : null)">@label</a>
+                    }
+                </nav>
+            </div>
+            <div class="language" aria-label="@site.T("Bahasa", "Language")">
+                <span>@site.Lang.ToUpperInvariant()</span>
+                <a href="@site.AlternatePath" hreflang="@site.T("en", "id")" lang="@site.T("en", "id")">@site.T("EN", "ID")</a>
+            </div>
+        }
+        else if (User.Identity?.IsAuthenticated == true)
+        {
+            <form action="/admin/logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline">Keluar</button>
+            </form>
+        }
+    </div>
+</header>
+<main id="main" class="@(admin ? "shell admin-main" : "")">
+    @RenderBody()
+</main>
+@if (site is not null)
+{
+    <footer>
+        <div class="shell footer-grid">
+            <div><strong>WD.SOUND</strong><p>@(site.Lang == "en" ? site.Settings.FooterEn ?? "Event equipment rental in East Java." : site.Settings.FooterId ?? "Penyewaan peralatan acara di Jawa Timur.")</p></div>
+            <nav aria-label="@site.T("Navigasi kaki halaman", "Footer navigation")">
+                @foreach (var section in new[] { "about", "products", "faq", "contact" }) { <a href="@site.Path(section)">@site.Label(section)</a> }
+                @if (!string.IsNullOrEmpty(site.Settings.AnalyticsId))
+                {
+                    <button type="button" class="link-button" data-consent-open>@site.T("Preferensi analitik", "Analytics preferences")</button>
+                }
+            </nav>
+        </div>
+        @if (!string.IsNullOrEmpty(site.Settings.AnalyticsId))
+        {
+            <dialog data-consent>
+                <h2>@site.T("Preferensi analitik", "Analytics preferences")</h2>
+                <p>@site.T("Izinkan pengukuran kunjungan dengan Google Analytics?", "Allow visit measurement with Google Analytics?")</p>
+                <button type="button" class="btn btn-primary" data-consent-choice="yes">@site.T("Izinkan", "Allow")</button>
+                <button type="button" class="btn btn-outline" data-consent-choice="no">@site.T("Tolak", "Decline")</button>
+            </dialog>
+        }
+    </footer>
+}
+</body>
+</html>

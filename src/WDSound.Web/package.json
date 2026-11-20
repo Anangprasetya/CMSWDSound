@@ -1,0 +1,11 @@
+{
+  "name": "wdsound-ui",
+  "private": true,
+  "dependencies": {
+    "alpinejs": "3.17.5",
+    "bootstrap": "5.3.9"
+  },
+  "scripts": {
+    "build": "node build-assets.cjs"
+  }
+}

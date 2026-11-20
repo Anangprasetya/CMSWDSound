@@ -1,0 +1,17 @@
+@model SiteSettings
+<partial name="_Menu" />
+<h1>Pengaturan website</h1>
+<form asp-action="Settings" method="post" class="form-stack panel">
+    <div asp-validation-summary="All" class="validation"></div>
+    <div class="field-grid">
+        <div><label asp-for="WhatsApp">WhatsApp (kode negara dan nomor)</label><input asp-for="WhatsApp" type="tel" placeholder="62…"></div>
+        <div><label asp-for="Email">Email resmi</label><input asp-for="Email" type="email"></div>
+        <div><label asp-for="Address">Alamat</label><input asp-for="Address"></div>
+        <div><label asp-for="Hours">Jam operasional</label><input asp-for="Hours"></div>
+        <div><label asp-for="FooterId">Footer Indonesia</label><textarea asp-for="FooterId"></textarea></div>
+        <div><label asp-for="FooterEn">Footer Inggris</label><textarea asp-for="FooterEn"></textarea></div>
+        <div><label asp-for="AnalyticsId">GA4 Measurement ID</label><input asp-for="AnalyticsId"></div>
+        <div><label asp-for="SearchVerification">Kode verifikasi Search Console</label><input asp-for="SearchVerification"></div>
+    </div>
+    <button class="btn btn-primary">Simpan pengaturan</button>
+</form>

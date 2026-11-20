@@ -1,0 +1,12 @@
+@model LoginInput
+@{ ViewData["Title"] = "Masuk"; }
+<section class="panel login">
+    <h1>Masuk ke dashboard</h1>
+    <form asp-action="Login" method="post" class="form-stack">
+        <div asp-validation-summary="All" class="validation"></div>
+        <label asp-for="Email">Email</label><input asp-for="Email" autocomplete="username" required>
+        <label asp-for="Password">Kata sandi</label><input asp-for="Password" autocomplete="current-password" required>
+        <button class="btn btn-primary">Masuk</button>
+    </form>
+    <a class="text-link" href="/id">Kembali ke website</a>
+</section>

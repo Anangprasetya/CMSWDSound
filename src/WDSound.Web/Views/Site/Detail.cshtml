@@ -1,0 +1,70 @@
+@model PublicPage
+@{
+    var entry = Model.Entry!;
+    var lang = Model.Lang;
+    var inventory = entry.Variants.Where(x => x.Active).ToList();
+}
+<section class="shell section">
+    <nav class="crumb" aria-label="@Model.T("Jejak halaman", "Breadcrumb")"><a href="@Model.Path("home")">@Model.Label("home")</a> / <a href="@Model.Path(Model.Section)">@Model.Label(Model.Section)</a> / @entry.Title(lang)</nav>
+    <div class="detail-grid">
+        <div>
+            <h1>@entry.Title(lang)</h1>
+            <p class="long-copy">@entry.Body(lang)</p>
+            <partial name="_Images" model="(entry, lang)" />
+            @if (entry.Specifications(lang) is { Length: > 0 } specs)
+            {
+                <h2>@Model.T("Spesifikasi", "Specifications")</h2>
+                <p class="long-copy">@specs</p>
+            }
+            @if (inventory.Count > 0)
+            {
+                <h2>@Model.T("Pilihan sewa", "Rental options")</h2>
+                @foreach (var group in entry.StartingPrices())
+                {
+                    <p class="price">@Model.T("Mulai dari", "From") @Variant.Money(group.Amount, group.Unit, lang)</p>
+                }
+                <ul class="variant-list">
+                    @foreach (var variant in inventory)
+                    {
+                        <li><strong>@variant.Name(lang)</strong><span>@Variant.Money(variant.Price, variant.Unit, lang)</span></li>
+                    }
+                </ul>
+            }
+            @if (entry.Kind == ContentKind.Package && entry.Items.Count > 0)
+            {
+                <h2>@Model.T("Isi paket", "Package contents")</h2>
+                <ul class="variant-list">
+                    @foreach (var item in entry.Items)
+                    {
+                        <li><a href="@Model.Path("products", item.Product.Slug)">@item.Product.Title(lang)</a><span>× @item.Quantity</span></li>
+                    }
+                </ul>
+            }
+        </div>
+        <aside class="panel inquiry" data-contextual>
+            <h2>@Model.T("Tanyakan penyewaan", "Ask about renting")</h2>
+            <p>@Model.T("Konfirmasi harga dan ketersediaan untuk tanggal acara Anda.", "Confirm pricing and availability for your event date.")</p>
+            @if (Model.WhatsApp(entry) is not null || Model.Email(entry) is not null)
+            {
+                <div class="form-stack mb-3">
+                    @if (inventory.Count > 0)
+                    {
+                        <label for="option">@Model.T("Varian", "Option")</label>
+                        <select id="option" data-inquiry-field><option value="">@Model.T("Pilih varian", "Select an option")</option>
+                            @foreach (var option in inventory) { <option>@option.Name(lang)</option> }
+                        </select>
+                    }
+                    <label for="event-date">@Model.T("Tanggal acara", "Event date")</label>
+                    <input id="event-date" type="date" required data-inquiry-field>
+                    <label for="quantity">@Model.T("Jumlah", "Quantity")</label>
+                    <input id="quantity" type="number" min="1" max="10000" step="1" required data-inquiry-field>
+                    <label for="event-location">@Model.T("Lokasi acara", "Event location")</label>
+                    <input id="event-location" maxlength="140" data-inquiry-field>
+                    <label for="event-note">@Model.T("Catatan (opsional)", "Notes (optional)")</label>
+                    <textarea id="event-note" rows="2" maxlength="350" data-inquiry-field></textarea>
+                </div>
+            }
+            <partial name="_Channels" model="Model" />
+        </aside>
+    </div>
+</section>

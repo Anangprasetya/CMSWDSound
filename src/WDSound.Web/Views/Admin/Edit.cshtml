@@ -1,0 +1,77 @@
+@model EntryInput
+<partial name="_Menu" />
+<h1>@(Model.Id is null ? "Buat draf" : "Edit konten") · @Model.Kind</h1>
+<form action="@(Model.Id is int id ? $"/admin/edit/{id}" : "/admin/edit")" method="post" class="form-stack panel">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden"><input asp-for="Revision" type="hidden"><input asp-for="Kind" type="hidden">
+    <div asp-validation-summary="All" class="validation"></div>
+    <div class="field-grid">
+        <div><label asp-for="Slug">Slug</label><input asp-for="Slug" maxlength="90" required></div>
+        <div><label asp-for="Sort">Urutan</label><input asp-for="Sort"></div>
+        <div><label asp-for="TitleId">Judul Indonesia</label><input asp-for="TitleId" required></div>
+        <div><label asp-for="TitleEn">Judul Inggris</label><input asp-for="TitleEn"></div>
+        @if (Model.Kind != ContentKind.Navigation)
+        {
+            <div><label asp-for="BodyId">Isi Indonesia</label><textarea asp-for="BodyId" rows="5"></textarea></div>
+            <div><label asp-for="BodyEn">Isi Inggris</label><textarea asp-for="BodyEn" rows="5"></textarea></div>
+            <div><label asp-for="SeoId">Deskripsi SEO Indonesia</label><input asp-for="SeoId"></div>
+            <div><label asp-for="SeoEn">Deskripsi SEO Inggris</label><input asp-for="SeoEn"></div>
+        }
+    </div>
+    @if (Model.Kind == ContentKind.Home)
+    {
+        <p class="hint">Gunakan slug home untuk hero, primary-cta atau secondary-cta untuk tombol, serta products, packages, gallery, testimonials, faq, atau contact untuk judul bagian.</p>
+        <label asp-for="Target">Tujuan tombol beranda</label>
+        <select asp-for="Target">
+            <option value="">Pilih halaman</option>
+            @foreach (var target in new[] { "home", "about", "products", "packages", "gallery", "testimonials", "faq", "contact" })
+            {
+                <option value="@target">@target</option>
+            }
+        </select>
+    }
+    @if (Model.Kind == ContentKind.Product)
+    {
+        <div class="field-grid">
+            <div><label asp-for="SpecsId">Spesifikasi Indonesia</label><textarea asp-for="SpecsId" rows="3"></textarea></div>
+            <div><label asp-for="SpecsEn">Spesifikasi Inggris</label><textarea asp-for="SpecsEn" rows="3"></textarea></div>
+        </div>
+        <label asp-for="CategoryId">Kategori</label>
+        <select asp-for="CategoryId">
+            <option value="">Pilih kategori</option>
+            @foreach (var category in (List<Entry>)ViewBag.Categories)
+            {
+                <option value="@category.Id">@category.TitleId @(!category.Published ? "(Draf)" : "")</option>
+            }
+        </select>
+        <label asp-for="Variants">Varian</label>
+        <p class="hint" id="variant-hint">Satu per baris: nama Indonesia | nama Inggris | day/event/unit/package | harga Rupiah | 1 (aktif) atau 0.</p>
+        <textarea asp-for="Variants" aria-describedby="variant-hint" rows="4"></textarea>
+    }
+    @if (Model.Kind == ContentKind.Package)
+    {
+        <label asp-for="Items">Komposisi paket</label>
+        <p class="hint" id="item-hint">Satu per baris: ID produk | jumlah.</p>
+        <textarea asp-for="Items" aria-describedby="item-hint" rows="3"></textarea>
+        <details><summary>Daftar ID produk</summary><ul>
+            @foreach (var item in (List<Entry>)ViewBag.Products) { <li>@item.Id · @item.TitleId</li> }
+        </ul></details>
+    }
+    @if (Model.Kind != ContentKind.Navigation)
+    {
+        <label asp-for="MediaIds">ID gambar (pisahkan dengan koma)</label>
+        <input asp-for="MediaIds">
+        <a class="text-link" href="/admin/media" target="_blank" rel="noopener">Buka pustaka media ↗</a>
+    }
+    @if (Model.Kind is ContentKind.Product or ContentKind.Package or ContentKind.Gallery) { <label class="check"><input asp-for="Featured"> Tampilkan di beranda</label> }
+    @if (User.IsInRole("Admin")) { <label class="check"><input asp-for="Published"> Terbitkan</label> }
+    <button class="btn btn-primary">Simpan</button>
+</form>
+@if (User.IsInRole("Admin") && Model.Id.HasValue && !Model.Published)
+{
+    <form action="/admin/delete/@Model.Id" method="post" class="mt-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="revision" value="@Model.Revision">
+        <button class="btn btn-outline">Hapus draf</button>
+    </form>
+}

@@ -1,0 +1,26 @@
+@model PublicPage
+@{
+    var wa = Model.WhatsApp(Model.Entry);
+    var email = Model.Email(Model.Entry);
+}
+<div class="actions">
+    @if (wa is not null)
+    {
+        <a class="btn btn-primary" data-channel="whatsapp" href="@wa" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
+    }
+    @if (email is not null)
+    {
+        <a class="btn btn-outline" data-channel="email" href="@email">Email ↗</a>
+    }
+    @if (wa is null && email is null)
+    {
+        @if (Model.Section != "contact")
+        {
+            <a class="btn btn-outline" href="@Model.Path("contact")">@Model.T("Buka formulir kontak", "Open contact form")</a>
+        }
+        else
+        {
+            <p>@Model.T("Gunakan formulir kontak untuk menyampaikan pertanyaan Anda.", "Use the contact form to send your inquiry.")</p>
+        }
+    }
+</div>

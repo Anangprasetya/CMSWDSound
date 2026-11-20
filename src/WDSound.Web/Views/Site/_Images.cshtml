@@ -1,0 +1,10 @@
+@model (Entry Entry, string Lang)
+@if (Model.Entry.Images.Count > 0)
+{
+    <div class="image-grid">
+        @foreach (var image in Model.Entry.Images.OrderBy(x => x.Sort))
+        {
+            <a href="/media/@image.MediaId"><img src="/media/@image.MediaId" alt="@image.Media.Alt(Model.Lang)" loading="lazy" width="640" height="400"></a>
+        }
+    </div>
+}

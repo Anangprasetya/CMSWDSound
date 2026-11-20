@@ -1,0 +1,29 @@
+@model (PublicPage Page, Entry Entry)
+@{
+    var (site, entry) = Model;
+    var image = entry.Images.OrderBy(x => x.Sort).FirstOrDefault();
+    var section = entry.Kind == ContentKind.Package ? "packages" : "products";
+    var detail = entry.Kind is ContentKind.Product or ContentKind.Package;
+}
+<article class="rental-card">
+    @if (image is not null && entry.Kind != ContentKind.Gallery)
+    {
+        <img class="card-image" src="/media/@image.MediaId" alt="@image.Media.Alt(site.Lang)" loading="lazy" width="640" height="400">
+    }
+    <div class="card-copy">
+        <h3>@entry.Title(site.Lang)</h3>
+        <p>@entry.Body(site.Lang)</p>
+        @if (entry.Kind == ContentKind.Gallery) { <partial name="_Images" model="(entry, site.Lang)" /> }
+        @if (entry.Kind == ContentKind.Product)
+        {
+            @foreach (var price in entry.StartingPrices())
+            {
+                <p class="price">@site.T("Mulai dari", "From") @Variant.Money(price.Amount, price.Unit, site.Lang)</p>
+            }
+        }
+        @if (detail)
+        {
+            <a class="text-link" href="@site.Path(section, entry.Slug)" aria-label="@site.T("Lihat", "View") @entry.Title(site.Lang)">@site.T("Lihat detail", "View details") ↗</a>
+        }
+    </div>
+</article>
